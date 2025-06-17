@@ -1,8 +1,8 @@
-"""Initial migration
+"""Add author and product relationships to Review model
 
-Revision ID: 8374f74b113b
+Revision ID: 6eaf0439665e
 Revises: 
-Create Date: 2025-06-12 21:32:10.014175
+Create Date: 2025-06-17 04:55:48.946517
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '8374f74b113b'
+revision = '6eaf0439665e'
 down_revision = None
 branch_labels = None
 depends_on = None

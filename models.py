@@ -79,3 +79,6 @@ class Review(db.Model):
     is_visible = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    author = db.relationship("User", backref="user_reviews", lazy=True)
+    product = db.relationship("Product", backref="product_reviews", lazy=True)
