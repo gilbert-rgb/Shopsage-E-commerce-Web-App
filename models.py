@@ -2,8 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from sqlalchemy import MetaData
 
-metadata =  MetaData()
-
+metadata = MetaData()
 db = SQLAlchemy(metadata=metadata)
 
 # -------------------- User --------------------
@@ -80,5 +79,10 @@ class Review(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    author = db.relationship("User", backref="user_reviews", lazy=True)
-    product = db.relationship("Product", backref="product_reviews", lazy=True)
+
+class TokenBlocklist(db.Model):
+    __tablename__ = "token_blocklist"
+
+    id = db.Column(db.Integer, primary_key=True)
+    jti = db.Column(db.String(36), nullable=False, unique=True)
+    created_at = db.Column(db.DateTime, nullable=False)
