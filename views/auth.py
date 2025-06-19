@@ -22,7 +22,7 @@ def create_user_by_admin():
     username = data.get("username")
     email = data.get("email")
     password = data.get("password")
-    is_admin = data.get("is_admin", False)
+    is_admin = data.get("is_admin", True)
 
     if not username or not email or not password:
         return jsonify(error="Username, email, and password are required"), 400

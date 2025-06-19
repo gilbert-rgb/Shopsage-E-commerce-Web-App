@@ -102,7 +102,6 @@ def fetch_all_users():
             "username": user.username,
             "email": user.email,
             "is_admin": user.is_admin,
-            "is_blocked": user.is_blocked,
             "created_at": user.created_at
         }
         user_list.append(user_data)

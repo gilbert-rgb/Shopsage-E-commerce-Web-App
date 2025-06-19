@@ -12,6 +12,9 @@ def create_product():
     if not current_user or not current_user.is_admin:
         return jsonify({"error": "Only admin users can add products"}), 403
 
+    if not request.is_json:
+        return jsonify({"error": "Missing JSON in request"}), 400
+
     data = request.get_json()
     name = data.get("name")
     price = data.get("price")
@@ -20,6 +23,15 @@ def create_product():
 
     if not name or price is None:
         return jsonify({"error": "Name and price are required"}), 400
+
+    try:
+        price = float(price)
+        stock = int(stock)
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid price or stock value"}), 400
+
+    if Product.query.filter_by(name=name).first():
+        return jsonify({"error": "Product with this name already exists"}), 409
 
     product = Product(
         name=name,
@@ -31,7 +43,17 @@ def create_product():
     db.session.add(product)
     db.session.commit()
 
-    return jsonify({"success": "Product created", "product_id": product.id}), 201
+    return jsonify({
+        "success": "Product created",
+        "product": {
+            "id": product.id,
+            "name": product.name,
+            "description": product.description,
+            "price": float(product.price),
+            "stock": product.stock,
+            "created_by": product.created_by
+        }
+    }), 201
 
 # -------------------- Get All Products --------------------
 @product_bp.route("/products", methods=["GET"])
@@ -76,6 +98,9 @@ def update_product(product_id):
     if not product:
         return jsonify({"error": "Product not found"}), 404
 
+    if not request.is_json:
+        return jsonify({"error": "Missing JSON in request"}), 400
+
     data = request.get_json()
     product.name = data.get("name", product.name)
     product.description = data.get("description", product.description)
@@ -100,3 +125,23 @@ def delete_product(product_id):
     db.session.delete(product)
     db.session.commit()
     return jsonify({"success": "Product deleted successfully"}), 200
+
+# -------------------- Promote User to Admin (Admin Only) --------------------
+@product_bp.route("/promote/<int:user_id>", methods=["PATCH"])
+@jwt_required()
+def promote_user(user_id):
+    current_user = User.query.get(get_jwt_identity())
+    if not current_user or not current_user.is_admin:
+        return jsonify({"error": "Only admin users can promote users"}), 403
+
+    user_to_promote = User.query.get(user_id)
+    if not user_to_promote:
+        return jsonify({"error": "User not found"}), 404
+
+    if user_to_promote.is_admin:
+        return jsonify({"message": "User is already an admin"}), 200
+
+    user_to_promote.is_admin = True
+    db.session.commit()
+
+    return jsonify({"success": f"User {user_id} has been promoted to admin"}), 200
