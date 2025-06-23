@@ -123,4 +123,3 @@ def delete_user(user_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"Delete failed: {str(e)}"}), 500
-
