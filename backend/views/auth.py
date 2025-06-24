@@ -75,11 +75,11 @@ def fetch_current_user():
         "is_admin": user.is_admin,
         "created_at": user.created_at
     }), 200
-
-# -------------------- Logout --------------------
 @auth_bp.route("/logout", methods=["DELETE"])
 @jwt_required()
 def logout():
+    print("DEBUG - Headers received:", request.headers)
+
     jti = get_jwt()["jti"]
     now = datetime.now(timezone.utc)
 
