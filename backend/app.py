@@ -29,7 +29,11 @@ app.config['MAIL_PASSWORD'] = 'rzcy ydmk sutz yzmq'
 app.config['MAIL_DEFAULT_SENDER'] = 'yourmail@gmail.com'
 
 # CORS (Allow frontend dev server at 5173)
-CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
+CORS(app, origins=[
+    "http://localhost:5173",
+    "http://127.0.0.1:5173"
+], supports_credentials=True)
+
 
 # ------------------ Initialize Extensions ------------------
 db.init_app(app)
