@@ -3,7 +3,6 @@ import { UserContext } from '../contexts/UserContext';
 import { ProductContext } from '../contexts/ProductContext';
 
 const AdminDashboard = () => {
-  // User context functions
   const {
     fetch_all_users,
     delete_user_admin,
@@ -11,15 +10,14 @@ const AdminDashboard = () => {
     create_user_by_admin,
   } = useContext(UserContext);
 
-  // Product context functions
   const {
     products,
     addProduct,
     deleteProduct,
-    promoteUser
+    updateProduct,
+    promoteUser,
   } = useContext(ProductContext);
 
-  // State for users
   const [users, setUsers] = useState([]);
   const [newUser, setNewUser] = useState({
     username: '',
@@ -28,7 +26,6 @@ const AdminDashboard = () => {
     is_admin: false,
   });
 
-  // State for new product
   const [newProduct, setNewProduct] = useState({
     name: '',
     price: '',
@@ -36,12 +33,18 @@ const AdminDashboard = () => {
     description: '',
   });
 
-  // Fetch all users on mount
+  const [editingProductId, setEditingProductId] = useState(null);
+  const [editProductData, setEditProductData] = useState({
+    name: '',
+    price: '',
+    stock: '',
+    description: '',
+  });
+
   useEffect(() => {
     fetch_all_users(setUsers);
   }, []);
 
-  // Handle user deletion
   const handleDeleteUser = (id) => {
     if (window.confirm('Delete this user?')) {
       delete_user_admin(id);
@@ -49,25 +52,43 @@ const AdminDashboard = () => {
     }
   };
 
-  // Handle user creation
   const handleCreateUser = () => {
     create_user_by_admin(newUser);
     setNewUser({ username: '', email: '', password: '', is_admin: false });
     fetch_all_users(setUsers);
   };
 
-  // Handle product creation
   const handleCreateProduct = () => {
     const { name, price, stock, description } = newProduct;
     addProduct(name, price, stock, description);
     setNewProduct({ name: '', price: '', stock: '', description: '' });
   };
 
+  const startEditing = (product) => {
+    setEditingProductId(product.id);
+    setEditProductData({
+      name: product.name,
+      price: product.price,
+      stock: product.stock,
+      description: product.description,
+    });
+  };
+
+  const cancelEditing = () => {
+    setEditingProductId(null);
+    setEditProductData({ name: '', price: '', stock: '', description: '' });
+  };
+
+  const handleUpdateProduct = async (id) => {
+    await updateProduct(id, editProductData);
+    cancelEditing();
+  };
+
   return (
     <div className="p-6 space-y-10">
       <h2 className="text-3xl font-bold mb-4">Admin Dashboard</h2>
 
-      {/* User Management */}
+      {/* Create User */}
       <div className="bg-white shadow p-4 rounded">
         <h3 className="text-xl font-semibold mb-2">Create New User</h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -112,6 +133,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
+      {/* User Table */}
       <table className="min-w-full bg-white shadow rounded overflow-hidden">
         <thead className="bg-gray-200 text-gray-700">
           <tr>
@@ -157,7 +179,7 @@ const AdminDashboard = () => {
         </tbody>
       </table>
 
-      {/* Product Management */}
+      {/* Create Product */}
       <div className="bg-white shadow p-4 rounded">
         <h3 className="text-xl font-semibold mb-2">Create New Product</h3>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -198,6 +220,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
+      {/* Product Table */}
       <table className="min-w-full bg-white shadow rounded overflow-hidden">
         <thead className="bg-gray-200 text-gray-700">
           <tr>
@@ -213,19 +236,94 @@ const AdminDashboard = () => {
           {products.map((product) => (
             <tr key={product.id} className="border-b">
               <td className="p-3">{product.id}</td>
-              <td className="p-3">{product.name}</td>
-              <td className="p-3">${product.price}</td>
-              <td className="p-3">{product.stock}</td>
-              <td className="p-3">{product.description}</td>
               <td className="p-3">
-                <button
-                  onClick={() => {
-                    if (window.confirm('Delete this product?')) deleteProduct(product.id);
-                  }}
-                  className="bg-red-600 text-white px-2 py-1 rounded"
-                >
-                  Delete
-                </button>
+                {editingProductId === product.id ? (
+                  <input
+                    value={editProductData.name}
+                    onChange={(e) =>
+                      setEditProductData({ ...editProductData, name: e.target.value })
+                    }
+                    className="border p-1 rounded"
+                  />
+                ) : (
+                  product.name
+                )}
+              </td>
+              <td className="p-3">
+                {editingProductId === product.id ? (
+                  <input
+                    type="number"
+                    value={editProductData.price}
+                    onChange={(e) =>
+                      setEditProductData({ ...editProductData, price: e.target.value })
+                    }
+                    className="border p-1 rounded"
+                  />
+                ) : (
+                  `$${product.price}`
+                )}
+              </td>
+              <td className="p-3">
+                {editingProductId === product.id ? (
+                  <input
+                    type="number"
+                    value={editProductData.stock}
+                    onChange={(e) =>
+                      setEditProductData({ ...editProductData, stock: e.target.value })
+                    }
+                    className="border p-1 rounded"
+                  />
+                ) : (
+                  product.stock
+                )}
+              </td>
+              <td className="p-3">
+                {editingProductId === product.id ? (
+                  <input
+                    value={editProductData.description}
+                    onChange={(e) =>
+                      setEditProductData({ ...editProductData, description: e.target.value })
+                    }
+                    className="border p-1 rounded"
+                  />
+                ) : (
+                  product.description
+                )}
+              </td>
+              <td className="p-3 space-x-2">
+                {editingProductId === product.id ? (
+                  <>
+                    <button
+                      onClick={() => handleUpdateProduct(product.id)}
+                      className="bg-blue-600 text-white px-2 py-1 rounded"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={cancelEditing}
+                      className="bg-gray-500 text-white px-2 py-1 rounded"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => startEditing(product)}
+                      className="bg-yellow-600 text-white px-2 py-1 rounded"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (window.confirm('Delete this product?')) deleteProduct(product.id);
+                      }}
+                      className="bg-red-600 text-white px-2 py-1 rounded"
+                    >
+                      Delete
+                    </button>
+                  </>
+                )}
               </td>
             </tr>
           ))}

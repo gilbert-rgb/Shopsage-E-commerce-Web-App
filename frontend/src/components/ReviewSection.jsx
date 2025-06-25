@@ -12,20 +12,20 @@ const ReviewSection = () => {
   const [comment, setComment] = useState("");
   const [editingReviewId, setEditingReviewId] = useState(null);
 
-  // Fetch reviews on mount
+  // Load reviews
   useEffect(() => {
     fetch(`http://localhost:5000/reviews/product/${productId}`)
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed");
+        return res.json();
+      })
       .then((data) => {
-        if (Array.isArray(data)) {
-          setReviews(data);
-        } else {
-          setReviews([]);
-        }
+        setReviews(Array.isArray(data) ? data : []);
       })
       .catch(() => toast.error("Failed to fetch reviews"));
   }, [productId]);
 
+  // Submit new review
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -52,13 +52,16 @@ const ReviewSection = () => {
       .then((data) => {
         if (data.success) {
           toast.success(data.success);
-          setReviews((prev) => [...prev, {
-            ...payload,
-            id: Date.now(), // temporary ID
-            username: currentUser.username,
-            user_id: currentUser.id,
-            created_at: new Date().toISOString()
-          }]);
+          setReviews((prev) => [
+            ...prev,
+            {
+              ...payload,
+              id: Date.now(), // temporary local ID
+              username: currentUser.username,
+              user_id: currentUser.id,
+              created_at: new Date().toISOString(),
+            },
+          ]);
           setRating(5);
           setComment("");
         } else {
@@ -67,13 +70,16 @@ const ReviewSection = () => {
       });
   };
 
+  // Start editing
   const handleEdit = (reviewId) => {
     const review = reviews.find((r) => r.id === reviewId);
+    if (!review) return;
     setEditingReviewId(reviewId);
     setRating(review.rating);
     setComment(review.comment);
   };
 
+  // Update review
   const handleUpdate = (e) => {
     e.preventDefault();
 
@@ -103,7 +109,10 @@ const ReviewSection = () => {
       });
   };
 
+  // Delete review
   const handleDelete = (reviewId) => {
+    if (!window.confirm("Are you sure you want to delete this review?")) return;
+
     fetch(`http://localhost:5000/reviews/${reviewId}`, {
       method: "DELETE",
       headers: {
@@ -125,7 +134,8 @@ const ReviewSection = () => {
     <div className="mt-10 border-t pt-6">
       <h2 className="text-xl font-bold mb-4">Customer Reviews</h2>
 
-      {Array.isArray(reviews) && reviews.length > 0 ? (
+      {/* Review List */}
+      {reviews.length > 0 ? (
         reviews.map((review) => (
           <div key={review.id} className="mb-4 p-4 border rounded bg-gray-50">
             <p className="text-sm text-gray-700">
@@ -155,6 +165,7 @@ const ReviewSection = () => {
         <p className="text-gray-500">No reviews yet.</p>
       )}
 
+      {/* Review Form */}
       {currentUser && (
         <form
           onSubmit={editingReviewId ? handleUpdate : handleSubmit}
@@ -174,6 +185,7 @@ const ReviewSection = () => {
               ))}
             </select>
           </div>
+
           <textarea
             placeholder="Write your review..."
             value={comment}
@@ -181,6 +193,7 @@ const ReviewSection = () => {
             className="w-full border rounded p-2"
             rows={4}
           />
+
           <button
             type="submit"
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"

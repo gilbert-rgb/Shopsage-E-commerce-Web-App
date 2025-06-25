@@ -1,3 +1,4 @@
+// App.js
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
@@ -5,7 +6,7 @@ import Layout from './components/Layout';
 import { UserProvider } from './contexts/UserContext';
 import { ProductProvider } from './contexts/ProductContext';
 import { OrderProvider } from './contexts/OrderContext';
-import { CartProvider } from './contexts/CartContext'; // ✅ ADD THIS LINE
+import { CartProvider } from './contexts/CartContext';
 
 import Home from './pages/Home';
 import AddProduct from './pages/AddProduct';
@@ -25,11 +26,12 @@ function App() {
       <UserProvider>
         <ProductProvider>
           <OrderProvider>
-            <CartProvider> {/* ✅ WRAP EVERYTHING INSIDE THIS */}
+            <CartProvider>
               <Routes>
                 <Route path="/" element={<Layout />}>
                   <Route index element={<Home />} />
                   <Route path="products" element={<Products />} />
+                  <Route path="products/:page" element={<Products />} /> {/* Pagination route */}
                   <Route path="product/:id" element={<ProductDetail />} />
                   <Route path="add-product" element={<AddProduct />} />
                   <Route path="user" element={<User />} />

@@ -4,7 +4,7 @@ from models import db, Review, Product, User, Order
 
 review_bp = Blueprint("review_bp", __name__)
 
-# Add a review
+# ----------------- Add Review -----------------
 @review_bp.route("/reviews", methods=["POST"])
 @jwt_required()
 def add_review():
@@ -17,25 +17,26 @@ def add_review():
     if not all([product_id, rating]):
         return jsonify({"error": "Product ID and rating are required"}), 400
 
-    # Check if user already reviewed this product
     existing = Review.query.filter_by(user_id=user_id, product_id=product_id).first()
     if existing:
         return jsonify({"error": "You already reviewed this product"}), 400
 
-    review = Review(user_id=user_id, product_id=product_id, rating=rating, comment=comment)
+    review = Review(
+        user_id=user_id,
+        product_id=product_id,
+        rating=rating,
+        comment=comment,
+        is_visible=True
+    )
     db.session.add(review)
     db.session.commit()
 
     return jsonify({"success": "Review submitted"}), 201
 
-
-# Get All Reviews for a Specific Product
+# ----------------- Get Reviews for a Product -----------------
 @review_bp.route("/reviews/product/<int:product_id>", methods=["GET"])
 def get_reviews_for_product(product_id):
     reviews = Review.query.filter_by(product_id=product_id, is_visible=True).all()
-
-    if not reviews:
-        return jsonify({"message": "No reviews found for this product"}), 404
 
     review_list = []
     for review in reviews:
@@ -48,10 +49,9 @@ def get_reviews_for_product(product_id):
             "created_at": review.created_at.isoformat()
         })
 
-    return jsonify(review_list), 200
+    return jsonify(review_list), 200  # ✅ Always return 200 with empty list if no reviews
 
-
-# Get Reviews for All Products in a Specific Order
+# ----------------- Get Reviews for a Specific Order -----------------
 @review_bp.route("/reviews/order/<int:order_id>", methods=["GET"])
 @jwt_required()
 def get_reviews_for_order(order_id):
@@ -64,14 +64,10 @@ def get_reviews_for_order(order_id):
         return jsonify({"error": "Unauthorized access to this order"}), 403
 
     product_ids = [item.product_id for item in order.order_items]
-
     reviews = Review.query.filter(
         Review.product_id.in_(product_ids),
         Review.is_visible == True
     ).all()
-
-    if not reviews:
-        return jsonify({"message": "No reviews found for this order's products"}), 404
 
     review_list = []
     for review in reviews:
@@ -88,16 +84,12 @@ def get_reviews_for_order(order_id):
 
     return jsonify(review_list), 200
 
-
-# NEW: Get Reviews for All Products in ALL Orders of the Authenticated User
+# ----------------- Get Reviews for All Products in User Orders -----------------
 @review_bp.route("/reviews/my-orders", methods=["GET"])
 @jwt_required()
 def get_reviews_for_my_orders():
     user_id = get_jwt_identity()
-
     orders = Order.query.filter_by(user_id=user_id).all()
-    if not orders:
-        return jsonify({"message": "No orders found"}), 404
 
     product_ids = set()
     for order in orders:
@@ -105,15 +97,12 @@ def get_reviews_for_my_orders():
             product_ids.add(item.product_id)
 
     if not product_ids:
-        return jsonify({"message": "No products found in your orders"}), 404
+        return jsonify([]), 200
 
     reviews = Review.query.filter(
         Review.product_id.in_(product_ids),
         Review.is_visible == True
     ).all()
-
-    if not reviews:
-        return jsonify({"message": "No reviews found for your ordered products"}), 404
 
     review_list = []
     for review in reviews:
@@ -130,8 +119,7 @@ def get_reviews_for_my_orders():
 
     return jsonify(review_list), 200
 
-
-# Edit Review
+# ----------------- Edit Review -----------------
 @review_bp.route("/reviews/<int:review_id>", methods=["PATCH"])
 @jwt_required()
 def update_review(review_id):
@@ -150,8 +138,7 @@ def update_review(review_id):
 
     return jsonify({"success": "Review updated"}), 200
 
-
-# Delete Review
+# ----------------- Delete Review -----------------
 @review_bp.route("/reviews/<int:review_id>", methods=["DELETE"])
 @jwt_required()
 def delete_review(review_id):

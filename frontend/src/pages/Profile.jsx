@@ -34,34 +34,34 @@ const Profile = () => {
   const handleSubmit = async e => {
     e.preventDefault();
 
-    if (!formData.username || !formData.email || !formData.password) {
+    const { username, email, password, newPassword } = formData;
+
+    if (!username || !email || !password) {
       toast.error("Username, Email, and Current Password are required.");
       return;
     }
 
-    if (formData.newPassword && formData.newPassword.length < 6) {
+    if (newPassword && newPassword.length < 6) {
       toast.error("New password must be at least 6 characters.");
       return;
     }
 
-    update_user_profile(
-      formData.username,
-      formData.email,
-      formData.password,
-      formData.newPassword
-    );
+    try {
+      await update_user_profile(username, email, password, newPassword);
+      toast.success("Profile updated successfully!");
 
-    // Optional: redirect or keep user on the page
-    setTimeout(() => navigate("/profile"), 1500);
+      setTimeout(() => navigate("/profile"), 1500);
+    } catch (err) {
+      toast.error("Failed to update profile.");
+    }
   };
 
   return (
     <div className="max-w-md mx-auto bg-white p-8 shadow-md rounded mt-8">
-      <h2 className="text-2xl font-semibold mb-6">Update Profile</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center text-blue-700">Update Profile</h2>
 
-      {/* ✅ Show role */}
       {currentUser && (
-        <p className="mb-4">
+        <p className="mb-4 text-center">
           Role:{" "}
           <span
             className={`font-semibold ${
@@ -79,7 +79,7 @@ const Profile = () => {
           name="username"
           value={formData.username}
           onChange={handleChange}
-          className="w-full px-4 py-2 border rounded"
+          className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Username"
           required
         />
@@ -88,7 +88,7 @@ const Profile = () => {
           name="email"
           value={formData.email}
           onChange={handleChange}
-          className="w-full px-4 py-2 border rounded"
+          className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Email"
           required
         />
@@ -97,7 +97,7 @@ const Profile = () => {
           name="password"
           value={formData.password}
           onChange={handleChange}
-          className="w-full px-4 py-2 border rounded"
+          className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Current Password"
           required
         />
@@ -106,12 +106,12 @@ const Profile = () => {
           name="newPassword"
           value={formData.newPassword}
           onChange={handleChange}
-          className="w-full px-4 py-2 border rounded"
+          className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="New Password (optional)"
         />
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
         >
           Save Changes
         </button>

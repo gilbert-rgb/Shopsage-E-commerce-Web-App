@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { UserContext } from '../contexts/UserContext'; // ✅ Make sure the path is correct
+import { UserContext } from '../contexts/UserContext';
 import { Link } from 'react-router-dom';
 
 const Login = () => {
@@ -13,62 +13,53 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900 flex justify-center">
-      <div className="max-w-screen-xl m-0 sm:m-10 bg-white shadow sm:rounded-lg flex justify-center flex-1">
-        
-        <div className="lg:w-1/2 xl:w-5/12 p-6 sm:p-12">
-          <div className="mt-12 flex flex-col items-center">
-            <h1 className="text-2xl xl:text-3xl font-extrabold">Login</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-white px-4">
+      <div className="w-full max-w-6xl bg-white shadow-xl rounded-lg overflow-hidden flex flex-col md:flex-row">
+        {/* Left Side Form */}
+        <div className="w-full md:w-1/2 p-8 md:p-12">
+          <h2 className="text-3xl font-bold text-blue-700 mb-6 text-center">Login to Your Account</h2>
+          
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <input
+              type="email"
+              required
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full border border-gray-300 px-4 py-3 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            />
+            <input
+              type="password"
+              required
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border border-gray-300 px-4 py-3 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            />
 
-            <div className="w-full flex-1 mt-8">
-              <form onSubmit={handleSubmit}>
-                <div className="mx-auto max-w-xs">
-                  <input
-                    required
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white"
-                  />
-                  <input
-                    required
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-8 py-4 rounded-lg font-medium bg-gray-100 border border-gray-200 placeholder-gray-500 text-sm focus:outline-none focus:border-gray-400 focus:bg-white mt-5"
-                  />
-                  <button
-                    type="submit"
-                    className="mt-5 tracking-wide font-semibold bg-sky-500 text-white w-full py-4 rounded-lg hover:bg-sky-700 transition-all duration-300 ease-in-out flex items-center justify-center"
-                  >
-                    Login
-                  </button>
-                </div>
-              </form>
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white py-3 rounded-md font-semibold hover:bg-blue-700 transition duration-300"
+            >
+              Login
+            </button>
+          </form>
 
-              <p className="mt-6 text-sm text-gray-600 text-center">
-                Don't have an account?{' '}
-                <Link
-                  to="/register"
-                  className="border-b border-gray-500 border-dotted hover:text-sky-600"
-                >
-                  Register here
-                </Link>
-              </p>
-            </div>
-          </div>
+          <p className="text-center text-gray-600 mt-6">
+            Don’t have an account?{' '}
+            <Link to="/register" className="text-blue-500 hover:underline">
+              Register here
+            </Link>
+          </p>
         </div>
 
-        <div className="flex-1 bg-sky-100 text-center hidden lg:flex">
-          <div
-            className="m-12 xl:m-16 w-full bg-contain bg-center bg-no-repeat"
-            style={{
-              backgroundImage:
-                "url('https://storage.googleapis.com/devitary-image-host.appspot.com/15848031292911696601-undraw_designer_life_w96d.svg')",
-            }}
-          ></div>
+        {/* Right Side Image */}
+        <div className="hidden md:flex w-full md:w-1/2 bg-blue-100 items-center justify-center">
+          <img
+            src="https://storage.googleapis.com/devitary-image-host.appspot.com/15848031292911696601-undraw_designer_life_w96d.svg"
+            alt="Login Visual"
+            className="w-3/4 h-auto"
+          />
         </div>
       </div>
     </div>
