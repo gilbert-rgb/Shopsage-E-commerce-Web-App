@@ -10,16 +10,16 @@ def create_admin_user():
         if admin:
             print(" Admin user already exists. No changes made.")
         else:
-            # Create a new admin user
+            # Create a new admin user with safe hash length
             new_admin = User(
                 username="admin",
                 email="admin@gmail.com",
-                password_hash=generate_password_hash("1234"),
+                password_hash=generate_password_hash("1234", method="pbkdf2:sha256"),
                 is_admin=True
             )
             db.session.add(new_admin)
             db.session.commit()
-            print(" New admin created: admin@gmail.com / 1234")
+            print(" ✅ New admin created: admin@gmail.com / 1234")
 
 if __name__ == "__main__":
     create_admin_user()
