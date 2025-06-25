@@ -2,6 +2,9 @@ import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { UserContext } from "../contexts/UserContext";
 import { toast } from "react-toastify";
+import config from "../config.json";
+
+const api_url = config.api_url;
 
 const ReviewSection = () => {
   const { id: productId } = useParams();
@@ -12,9 +15,8 @@ const ReviewSection = () => {
   const [comment, setComment] = useState("");
   const [editingReviewId, setEditingReviewId] = useState(null);
 
-  // Load reviews
   useEffect(() => {
-    fetch(`http://localhost:5000/reviews/product/${productId}`)
+    fetch(`${api_url}/reviews/product/${productId}`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed");
         return res.json();
@@ -25,7 +27,6 @@ const ReviewSection = () => {
       .catch(() => toast.error("Failed to fetch reviews"));
   }, [productId]);
 
-  // Submit new review
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -40,7 +41,7 @@ const ReviewSection = () => {
       comment,
     };
 
-    fetch("http://localhost:5000/reviews", {
+    fetch(`${api_url}/reviews`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -50,16 +51,13 @@ const ReviewSection = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.success) {
+        if (data.success && data.review) {
           toast.success(data.success);
           setReviews((prev) => [
             ...prev,
             {
-              ...payload,
-              id: Date.now(), // temporary local ID
+              ...data.review,
               username: currentUser.username,
-              user_id: currentUser.id,
-              created_at: new Date().toISOString(),
             },
           ]);
           setRating(5);
@@ -67,10 +65,10 @@ const ReviewSection = () => {
         } else {
           toast.error(data.error || "Failed to submit review");
         }
-      });
+      })
+      .catch(() => toast.error("Network error submitting review"));
   };
 
-  // Start editing
   const handleEdit = (reviewId) => {
     const review = reviews.find((r) => r.id === reviewId);
     if (!review) return;
@@ -79,11 +77,10 @@ const ReviewSection = () => {
     setComment(review.comment);
   };
 
-  // Update review
   const handleUpdate = (e) => {
     e.preventDefault();
 
-    fetch(`http://localhost:5000/reviews/${editingReviewId}`, {
+    fetch(`${api_url}/reviews/${editingReviewId}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -106,14 +103,14 @@ const ReviewSection = () => {
         } else {
           toast.error(data.error || "Failed to update review");
         }
-      });
+      })
+      .catch(() => toast.error("Network error updating review"));
   };
 
-  // Delete review
   const handleDelete = (reviewId) => {
     if (!window.confirm("Are you sure you want to delete this review?")) return;
 
-    fetch(`http://localhost:5000/reviews/${reviewId}`, {
+    fetch(`${api_url}/reviews/${reviewId}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${auth_token}`,
@@ -127,14 +124,14 @@ const ReviewSection = () => {
         } else {
           toast.error(data.error || "Failed to delete review");
         }
-      });
+      })
+      .catch(() => toast.error("Network error deleting review"));
   };
 
   return (
     <div className="mt-10 border-t pt-6">
       <h2 className="text-xl font-bold mb-4">Customer Reviews</h2>
 
-      {/* Review List */}
       {reviews.length > 0 ? (
         reviews.map((review) => (
           <div key={review.id} className="mb-4 p-4 border rounded bg-gray-50">
@@ -165,7 +162,6 @@ const ReviewSection = () => {
         <p className="text-gray-500">No reviews yet.</p>
       )}
 
-      {/* Review Form */}
       {currentUser && (
         <form
           onSubmit={editingReviewId ? handleUpdate : handleSubmit}
