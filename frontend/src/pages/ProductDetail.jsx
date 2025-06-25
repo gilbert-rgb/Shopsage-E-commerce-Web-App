@@ -1,10 +1,11 @@
 import { useContext, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { ProductContext } from "../contexts/ProductContext";
 import { OrderContext } from "../contexts/OrderContext";
 import { CartContext } from "../contexts/CartContext";
-import { UserContext } from "../contexts/UserContext"; // ✅ Add this
+import { UserContext } from "../contexts/UserContext";
 import { toast } from "react-toastify";
+import ReviewSection from "../components/ReviewSection"; // ✅ Import review section
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -12,7 +13,8 @@ const ProductDetail = () => {
   const { products } = useContext(ProductContext);
   const { place_order } = useContext(OrderContext);
   const { addToCart } = useContext(CartContext);
-  const { currentUser } = useContext(UserContext); // ✅ Get user
+  const { currentUser } = useContext(UserContext);
+
   const [quantity, setQuantity] = useState(1);
 
   const product = products.find((p) => p.id === parseInt(id));
@@ -82,10 +84,20 @@ const ProductDetail = () => {
 
       {!currentUser && (
         <p className="text-sm text-gray-600 mt-4">
-          Please <Link to="/login" className="text-blue-500 underline">login</Link> or{" "}
-          <Link to="/register" className="text-blue-500 underline">register</Link> to place an order.
+          Please{" "}
+          <Link to="/login" className="text-blue-500 underline">
+            login
+          </Link>{" "}
+          or{" "}
+          <Link to="/register" className="text-blue-500 underline">
+            register
+          </Link>{" "}
+          to place an order.
         </p>
       )}
+
+      {/*  Review Section */}
+      <ReviewSection productId={product.id} />
     </div>
   );
 };

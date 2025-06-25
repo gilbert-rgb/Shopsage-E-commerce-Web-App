@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from flask import Blueprint, request, jsonify
 from models import db, Product, User
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -20,6 +23,7 @@ def create_product():
     price = data.get("price")
     stock = data.get("stock", 0)
     description = data.get("description", "")
+    image = data.get("image", "")  
 
     if not name or price is None:
         return jsonify({"error": "Name and price are required"}), 400
@@ -29,6 +33,8 @@ def create_product():
         stock = int(stock)
     except (TypeError, ValueError):
         return jsonify({"error": "Invalid price or stock value"}), 400
+    
+    
 
     if Product.query.filter_by(name=name).first():
         return jsonify({"error": "Product with this name already exists"}), 409
@@ -38,6 +44,7 @@ def create_product():
         description=description,
         price=price,
         stock=stock,
+        image=image,  
         created_by=current_user.id
     )
     db.session.add(product)
@@ -51,6 +58,7 @@ def create_product():
             "description": product.description,
             "price": float(product.price),
             "stock": product.stock,
+            "image": product.image,
             "created_by": product.created_by
         }
     }), 201
@@ -66,6 +74,7 @@ def get_products():
             "description": p.description,
             "price": float(p.price),
             "stock": p.stock,
+            "image": p.image,
             "created_by": p.created_by
         } for p in products
     ]), 200
@@ -83,6 +92,7 @@ def get_product(product_id):
         "description": product.description,
         "price": float(product.price),
         "stock": product.stock,
+        "image": product.image,
         "created_by": product.created_by
     }), 200
 
@@ -106,6 +116,7 @@ def update_product(product_id):
     product.description = data.get("description", product.description)
     product.price = data.get("price", product.price)
     product.stock = data.get("stock", product.stock)
+    product.image = data.get("image", product.image)  # ✅ Update image too
 
     db.session.commit()
     return jsonify({"success": "Product updated successfully"}), 200

@@ -9,6 +9,7 @@ const AddProduct = () => {
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
+  const [image, setImage] = useState(''); // ✅ Image state
 
   const { auth_token, currentUser } = useContext(UserContext);
   const { addProduct } = useContext(ProductContext);
@@ -30,7 +31,7 @@ const AddProduct = () => {
     if (name.length < 3) return toast.error("Product name must be at least 3 characters long.");
     if (!price || isNaN(price)) return toast.error("Please enter a valid price.");
 
-    addProduct(name, parseFloat(price), parseInt(stock || 0), description);
+    addProduct(name, parseFloat(price), parseInt(stock || 0), description, image); // ✅ include image
     setTimeout(() => navigate('/products'), 1000);
   };
 
@@ -66,6 +67,13 @@ const AddProduct = () => {
           value={stock}
           onChange={(e) => setStock(e.target.value)}
         />
+        <input
+          type="text"
+          placeholder="Image URL"
+          className="w-full p-3 border rounded"
+          value={image}
+          onChange={(e) => setImage(e.target.value)}
+        /> {/* ✅ New field for image URL */}
         <button className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700" type="submit">
           Add Product
         </button>

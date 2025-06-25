@@ -13,8 +13,8 @@ export const ProductProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [onChange, setOnChange] = useState(false);
 
-  // -------------------- Add Product (Admin Only) --------------------
-  function addProduct(name, price, stock, description) {
+  // -------------------- Add Product (with image) --------------------
+  function addProduct(name, price, stock, description, image) {
     toast.loading("Adding product...");
     fetch(`${api_url}/products`, {
       method: "POST",
@@ -22,7 +22,7 @@ export const ProductProvider = ({ children }) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${auth_token}`
       },
-      body: JSON.stringify({ name, price, stock, description })
+      body: JSON.stringify({ name, price, stock, description, image }) // ✅ include image
     })
       .then(res => res.json())
       .then(data => {
@@ -63,7 +63,7 @@ export const ProductProvider = ({ children }) => {
       });
   }
 
-  // -------------------- Update Product (Admin Only) --------------------
+  // -------------------- Update Product --------------------
   function updateProduct(id, fields) {
     toast.loading("Updating product...");
     fetch(`${api_url}/products/${id}`, {
@@ -90,7 +90,7 @@ export const ProductProvider = ({ children }) => {
       });
   }
 
-  // -------------------- Delete Product (Admin Only) --------------------
+  // -------------------- Delete Product --------------------
   function deleteProduct(id) {
     toast.loading("Deleting product...");
     fetch(`${api_url}/products/${id}`, {
@@ -115,7 +115,7 @@ export const ProductProvider = ({ children }) => {
       });
   }
 
-  // -------------------- Promote User to Admin --------------------
+  // -------------------- Promote User --------------------
   function promoteUser(userId) {
     toast.loading("Promoting user...");
     fetch(`${api_url}/promote/${userId}`, {

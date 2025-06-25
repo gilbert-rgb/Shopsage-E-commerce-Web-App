@@ -22,7 +22,6 @@ class User(db.Model):
     orders = db.relationship('Order', backref='customer', lazy=True)
     reviews = db.relationship('Review', backref='author', lazy=True)
 
-
 # -------------------- Product --------------------
 class Product(db.Model):
     __tablename__ = 'products'
@@ -32,6 +31,7 @@ class Product(db.Model):
     description = db.Column(db.Text)
     price = db.Column(db.Numeric(10, 2), nullable=False)
     stock = db.Column(db.Integer, default=0)
+    image = db.Column(db.String(500),nullable=True)   
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -39,6 +39,7 @@ class Product(db.Model):
     # Relationships
     reviews = db.relationship('Review', backref='product', lazy=True)
     order_items = db.relationship('OrderItem', backref='product', lazy=True)
+
 
 
 # -------------------- Order --------------------

@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "../contexts/UserContext";
-import { CartContext } from "../contexts/CartContext"; // ✅ Don't forget this
+import { CartContext } from "../contexts/CartContext";
 
 const Navbar = () => {
   const { currentUser, logout_user } = useContext(UserContext);
@@ -33,11 +33,18 @@ const Navbar = () => {
               <Link to="/profile" className="hover:underline">
                 Profile ({currentUser.is_admin ? "Admin" : "User"})
               </Link>
+
               {currentUser.is_admin && (
-                <Link to="/admin" className="hover:underline">
-                  Admin Dashboard
-                </Link>
+                <>
+                  <Link to="/admin" className="hover:underline">
+                    Admin Dashboard
+                  </Link>
+                  <Link to="/add-product" className="hover:underline text-yellow-300 font-semibold">
+                    + Add Product
+                  </Link>
+                </>
               )}
+
               <button
                 onClick={logout_user}
                 className="ml-4 bg-red-500 px-3 py-1 rounded hover:bg-red-600"
