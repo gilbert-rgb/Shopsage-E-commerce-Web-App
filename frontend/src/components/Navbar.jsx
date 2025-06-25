@@ -1,9 +1,13 @@
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "../contexts/UserContext";
+import { CartContext } from "../contexts/CartContext"; // ✅ Don't forget this
 
 const Navbar = () => {
   const { currentUser, logout_user } = useContext(UserContext);
+  const { cart = [] } = useContext(CartContext) || {};
+
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <nav className="bg-blue-600 text-white px-4 py-3">
@@ -13,29 +17,27 @@ const Navbar = () => {
         </Link>
 
         <div className="space-x-4 flex items-center">
+          <Link to="/products" className="hover:underline">
+            Products
+          </Link>
+
+          <Link to="/cart" className="hover:underline">
+            Cart ({totalItems})
+          </Link>
+
           {currentUser ? (
             <>
-              <Link to="/add-product" className="hover:underline">
-                Add Product
+              <Link to="/orders" className="hover:underline">
+                Orders
               </Link>
-
-              <Link to="/profile" className="hover:underline flex items-center space-x-1">
-                <span>Profile</span>
-                <span
-                  className={`font-semibold ${
-                    currentUser.is_admin ? "text-green-300" : "text-gray-300"
-                  }`}
-                >
-                  ({currentUser.is_admin ? "Admin" : "User"})
-                </span>
+              <Link to="/profile" className="hover:underline">
+                Profile ({currentUser.is_admin ? "Admin" : "User"})
               </Link>
-
               {currentUser.is_admin && (
                 <Link to="/admin" className="hover:underline">
                   Admin Dashboard
                 </Link>
               )}
-
               <button
                 onClick={logout_user}
                 className="ml-4 bg-red-500 px-3 py-1 rounded hover:bg-red-600"

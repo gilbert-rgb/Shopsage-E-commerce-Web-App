@@ -22,8 +22,11 @@ export const UserProvider = ({ children }) => {
       .then(res => res.json())
       .then(res => {
         toast.dismiss();
-        res.error ? toast.error(res.error) : toast.success(res.success);
-        if (res.success) navigate("/login");
+        if (res.error) toast.error(res.error);
+        else {
+          toast.success(res.success);
+          navigate("/login");
+        }
       })
       .catch(() => {
         toast.dismiss();
@@ -42,11 +45,13 @@ export const UserProvider = ({ children }) => {
       .then(res => res.json())
       .then(res => {
         toast.dismiss();
-        if (res.error) return toast.error(res.error);
-        toast.success("Logged in!");
-        localStorage.setItem("access_token", res.access_token);
-        setAuthToken(res.access_token);
-        navigate("/");
+        if (res.error) toast.error(res.error);
+        else {
+          toast.success("Logged in!");
+          localStorage.setItem("access_token", res.access_token);
+          setAuthToken(res.access_token);
+          setTimeout(() => navigate("/"), 100);
+        }
       })
       .catch(() => {
         toast.dismiss();
@@ -56,7 +61,8 @@ export const UserProvider = ({ children }) => {
 
   // ========== Logout ==========
   const logout_user = () => {
-    if (!auth_token || auth_token === "null") {
+    const token = localStorage.getItem("access_token");
+    if (!token || token === "null") {
       toast.warning("Already logged out.");
       localStorage.removeItem("access_token");
       setAuthToken(null);
@@ -68,14 +74,11 @@ export const UserProvider = ({ children }) => {
     fetch(`${api_url}/logout`, {
       method: "DELETE",
       headers: {
-        Authorization: `Bearer ${auth_token}`,
+        Authorization: `Bearer ${token}`,
       },
     })
-      .then(async res => {
-        if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data.error || "Logout failed.");
-        }
+      .then(res => {
+        if (!res.ok) return res.json().then(data => Promise.reject(data.error));
         return res.json();
       })
       .then(res => {
@@ -85,10 +88,36 @@ export const UserProvider = ({ children }) => {
         setCurrentUser(null);
         navigate("/login");
       })
-      .catch(err => {
-        toast.error(err.message || "Logout failed.");
+      .catch(error => {
+        toast.error(error || "Logout failed.");
       });
   };
+
+  // ========== Fetch Current User ==========
+  useEffect(() => {
+    if (auth_token && auth_token !== "null") {
+      fetch(`${api_url}/current_user`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${auth_token}`,
+        },
+      })
+        .then(res => {
+          if (!res.ok) {
+            if (res.status === 401) return Promise.reject("Session expired. Please login again.");
+            return Promise.reject("Failed to fetch user.");
+          }
+          return res.json();
+        })
+        .then(data => {
+          setCurrentUser(data);
+        })
+        .catch(err => {
+          toast.error(err);
+          logout_user();
+        });
+    }
+  }, [auth_token]);
 
   // ========== Update Profile ==========
   const update_user_profile = (username, email, password, newPassword) => {
@@ -118,7 +147,6 @@ export const UserProvider = ({ children }) => {
     fetch(`${api_url}/delete_user_profile`, {
       method: "DELETE",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${auth_token}`,
       },
     })
@@ -134,40 +162,18 @@ export const UserProvider = ({ children }) => {
         } else {
           toast.error(res.error || "Delete failed.");
         }
+      })
+      .catch(() => {
+        toast.dismiss();
+        toast.error("Delete failed.");
       });
   };
 
-  // ========== Fetch Current User ==========
-  useEffect(() => {
-    if (auth_token && auth_token !== "null") {
-      fetch(`${api_url}/current_user`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth_token}`,
-        },
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.error || data.msg) {
-            toast.error(data.error || "Session expired. Please login again.");
-            logout_user();
-          } else {
-            setCurrentUser(data);
-          }
-        })
-        .catch(err => {
-          console.error("User fetch failed:", err);
-          toast.error("Failed to fetch user.");
-          logout_user();
-        });
-    }
-  }, [auth_token]);
+  // ========== Admin ==========
 
-  // ========== Admin Functions ==========
   const fetch_all_users = callback => {
     fetch(`${api_url}/users`, {
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${auth_token}`,
       },
     })
@@ -182,7 +188,6 @@ export const UserProvider = ({ children }) => {
   const fetch_user_by_id = (userId, callback) => {
     fetch(`${api_url}/users/${userId}`, {
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${auth_token}`,
       },
     })
@@ -255,7 +260,7 @@ export const UserProvider = ({ children }) => {
       });
   };
 
-  // ========== Context Value ==========
+  // ========== Context ==========
   const context_data = {
     auth_token,
     currentUser,

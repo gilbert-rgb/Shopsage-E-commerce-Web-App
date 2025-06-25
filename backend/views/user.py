@@ -6,8 +6,8 @@ from app import app, mail
 
 user_bp = Blueprint("user_bp", __name__)
 
-# Register New User
 
+# Register New User
 @user_bp.route("/users", methods=["POST"])
 def create_user():
     data = request.get_json()
@@ -31,15 +31,19 @@ def create_user():
         db.session.add(new_user)
         db.session.commit()
 
-        msg = Message(
-            subject="Welcome to ShopSage",
-            recipients=[email],
-            sender=app.config['MAIL_DEFAULT_SENDER'],
-            body=f"Hello {username},\n\nThank you for registering on ShopSage.\n\nBest regards,\nShopSage Team"
-        )
-        mail.send(msg)
+        # Send welcome email
+        try:
+            msg = Message(
+                subject="Welcome to ShopSage",
+                recipients=[email],
+                sender=app.config['MAIL_DEFAULT_SENDER'],
+                body=f"Hello {username},\n\nThank you for registering on ShopSage.\n\nBest regards,\nShopSage Team"
+            )
+            mail.send(msg)
+        except Exception as mail_err:
+            print(f"[MAIL ERROR] {mail_err}")
 
-        return jsonify({"success": "User registered and welcome email sent."}), 201
+        return jsonify({"success": "User registered."}), 201
 
     except Exception as e:
         db.session.rollback()
@@ -61,13 +65,17 @@ def update_user(user_id):
     try:
         db.session.commit()
 
-        msg = Message(
-            subject="Profile Updated",
-            recipients=[user.email],
-            sender=app.config['MAIL_DEFAULT_SENDER'],
-            body=f"Hello {user.username},\n\nYour profile has been updated.\n\nBest,\nShopSage Team"
-        )
-        mail.send(msg)
+        # Send profile update email
+        try:
+            msg = Message(
+                subject="Profile Updated",
+                recipients=[user.email],
+                sender=app.config['MAIL_DEFAULT_SENDER'],
+                body=f"Hello {user.username},\n\nYour profile has been updated.\n\nBest,\nShopSage Team"
+            )
+            mail.send(msg)
+        except Exception as mail_err:
+            print(f"[MAIL ERROR] {mail_err}")
 
         return jsonify({"success": "User updated successfully."}), 200
 
@@ -75,7 +83,8 @@ def update_user(user_id):
         db.session.rollback()
         return jsonify({"error": f"Update failed: {str(e)}"}), 500
 
-#  Get User by ID
+
+# Get User by ID
 @user_bp.route("/users/<int:user_id>", methods=["GET"])
 def fetch_user_by_id(user_id):
     user = User.query.get(user_id)
@@ -90,26 +99,26 @@ def fetch_user_by_id(user_id):
         "created_at": user.created_at.isoformat()
     }), 200
 
+
 # Get All Users
 @user_bp.route("/users", methods=["GET"])
 def fetch_all_users():
     users = User.query.all()
-
     user_list = []
+
     for user in users:
-        user_data = {
+        user_list.append({
             "id": user.id,
             "username": user.username,
             "email": user.email,
             "is_admin": user.is_admin,
-            "created_at": user.created_at
-        }
-        user_list.append(user_data)
-        
+            "created_at": user.created_at.isoformat()
+        })
+
     return jsonify(user_list), 200
 
-#  Delete User
 
+# Delete User
 @user_bp.route("/users/<int:user_id>", methods=["DELETE"])
 def delete_user(user_id):
     user = User.query.get(user_id)
@@ -120,6 +129,7 @@ def delete_user(user_id):
         db.session.delete(user)
         db.session.commit()
         return jsonify({"success": "User deleted successfully."}), 200
+
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"Delete failed: {str(e)}"}), 500

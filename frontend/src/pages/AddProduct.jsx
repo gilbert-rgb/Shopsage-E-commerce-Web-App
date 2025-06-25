@@ -1,7 +1,8 @@
-import React, { useContext, useState } from 'react';
-import { UserContext } from '../contexts/UserContext'; // Ensure correct path
+import React, { useContext, useState, useEffect } from 'react';
+import { UserContext } from '../contexts/UserContext';
+import { ProductContext } from '../contexts/ProductContext';
 import { toast } from 'react-toastify';
-import { api_url } from '../config.json';
+import { useNavigate } from 'react-router-dom';
 
 const AddProduct = () => {
   const [name, setName] = useState('');
@@ -10,50 +11,27 @@ const AddProduct = () => {
   const [stock, setStock] = useState('');
 
   const { auth_token, currentUser } = useContext(UserContext);
+  const { addProduct } = useContext(ProductContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    console.log("✅ AddProduct loaded");
+    console.log("👤 currentUser:", currentUser);
+    console.log("🔑 auth_token:", auth_token);
+  }, [currentUser, auth_token]);
 
   if (!currentUser || !currentUser.is_admin) {
-    return <div className="text-center mt-20">Unauthorized. Admins only.</div>;
+    return <div className="text-center mt-20 text-red-600 text-xl">⛔ Unauthorized. Admins only.</div>;
   }
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (name.length < 3) {
-      toast.error("Product name must be at least 3 characters long.");
-      return;
-    }
+    if (name.length < 3) return toast.error("Product name must be at least 3 characters long.");
+    if (!price || isNaN(price)) return toast.error("Please enter a valid price.");
 
-    if (!price || isNaN(price)) {
-      toast.error("Please enter a valid price.");
-      return;
-    }
-
-    fetch(`${api_url}/products`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${auth_token}`
-      },
-      body: JSON.stringify({
-        name,
-        description,
-        price: parseFloat(price),
-        stock: parseInt(stock || 0)
-      })
-    })
-      .then(res => res.json())
-      .then(res => {
-        if (res.error) {
-          toast.error(res.error);
-        } else {
-          toast.success("Product added successfully!");
-          setName('');
-          setDescription('');
-          setPrice('');
-          setStock('');
-        }
-      })
-      .catch(() => toast.error("An error occurred while adding the product."));
+    addProduct(name, parseFloat(price), parseInt(stock || 0), description);
+    setTimeout(() => navigate('/products'), 1000);
   };
 
   return (
@@ -61,62 +39,36 @@ const AddProduct = () => {
       <h2 className="text-2xl font-semibold text-gray-700 mb-4">Add a New Product</h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label htmlFor="name" className="block text-gray-600 font-medium">Product Name</label>
-          <input required
-            type="text"
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="mt-2 p-3 w-full border border-gray-300 rounded-md"
-            placeholder="Enter product name"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="description" className="block text-gray-600 font-medium">Description</label>
-          <textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="mt-2 p-3 w-full border border-gray-300 rounded-md"
-            placeholder="Enter product description"
-            rows="4"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="price" className="block text-gray-600 font-medium">Price</label>
-          <input required
-            type="number"
-            id="price"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            className="mt-2 p-3 w-full border border-gray-300 rounded-md"
-            placeholder="Enter product price"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="stock" className="block text-gray-600 font-medium">Stock</label>
-          <input
-            type="number"
-            id="stock"
-            value={stock}
-            onChange={(e) => setStock(e.target.value)}
-            className="mt-2 p-3 w-full border border-gray-300 rounded-md"
-            placeholder="Enter stock quantity"
-          />
-        </div>
-
-        <div>
-          <button
-            type="submit"
-            className="w-full bg-sky-500 text-white py-3 rounded-md hover:bg-sky-600 transition"
-          >
-            Add Product
-          </button>
-        </div>
+        <input
+          type="text"
+          placeholder="Product Name"
+          className="w-full p-3 border rounded"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <textarea
+          placeholder="Description"
+          className="w-full p-3 border rounded"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+        <input
+          type="number"
+          placeholder="Price"
+          className="w-full p-3 border rounded"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+        />
+        <input
+          type="number"
+          placeholder="Stock"
+          className="w-full p-3 border rounded"
+          value={stock}
+          onChange={(e) => setStock(e.target.value)}
+        />
+        <button className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700" type="submit">
+          Add Product
+        </button>
       </form>
     </div>
   );

@@ -1,13 +1,17 @@
-// src/pages/Register.jsx
-import { useState } from 'react';
+import { useState, useContext } from 'react';
+import { UserContext } from '../contexts/UserContext';
 
 const Register = () => {
+  const { register_user } = useContext(UserContext);
+
   const [form, setForm] = useState({
-    name: '',
+    username: '',
     email: '',
     password: '',
     confirmPassword: '',
   });
+
+  const [error, setError] = useState('');
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -15,12 +19,28 @@ const Register = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (form.password !== form.confirmPassword) {
-      alert('Passwords do not match');
+
+    const { username, email, password, confirmPassword } = form;
+
+    const trimmed = {
+      username: username.trim(),
+      email: email.trim(),
+      password: password.trim(),
+      confirmPassword: confirmPassword.trim(),
+    };
+
+    if (!trimmed.username || !trimmed.email || !trimmed.password || !trimmed.confirmPassword) {
+      setError('All fields are required.');
       return;
     }
-    console.log('Register:', form);
-    // Register user here
+
+    if (trimmed.password !== trimmed.confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
+    setError('');
+    register_user(trimmed.username, trimmed.email, trimmed.password);
   };
 
   return (
@@ -29,8 +49,9 @@ const Register = () => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="text"
-          name="name"
-          placeholder="Name"
+          name="username"
+          placeholder="Username"
+          value={form.username}
           onChange={handleChange}
           className="w-full px-4 py-2 border rounded"
         />
@@ -38,6 +59,7 @@ const Register = () => {
           type="email"
           name="email"
           placeholder="Email"
+          value={form.email}
           onChange={handleChange}
           className="w-full px-4 py-2 border rounded"
         />
@@ -45,6 +67,7 @@ const Register = () => {
           type="password"
           name="password"
           placeholder="Password"
+          value={form.password}
           onChange={handleChange}
           className="w-full px-4 py-2 border rounded"
         />
@@ -52,9 +75,13 @@ const Register = () => {
           type="password"
           name="confirmPassword"
           placeholder="Confirm Password"
+          value={form.confirmPassword}
           onChange={handleChange}
           className="w-full px-4 py-2 border rounded"
         />
+
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+
         <button
           type="submit"
           className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
