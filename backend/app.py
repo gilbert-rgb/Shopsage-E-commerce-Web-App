@@ -1,9 +1,14 @@
 from datetime import timedelta
-from flask import Flask, jsonify, request
+from flask import Flask
 from flask_migrate import Migrate
 from flask_mail import Mail
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env
+load_dotenv()
 
 # Models
 from models import db, TokenBlocklist, User, Product, Order, OrderItem, Review
@@ -14,26 +19,22 @@ app = Flask(__name__)
 # ------------------- Configuration -------------------
 
 # Database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://shopsage_db_user:llqErpMpeynR1XKszCxbpP9zGLxaxM1N@dpg-d1e55ingi27c7389cn80-a.oregon-postgres.render.com/shopsage_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # JWT
-app.config["JWT_SECRET_KEY"] = "fryuimnbvjsefvyilgfvksbhvfiknhalvufn"
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=24)
 app.config["JWT_VERIFY_SUB"] = False
-
- 
-
-  
 
 # Mail
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config["MAIL_USE_SSL"] = False
-app.config['MAIL_USERNAME'] = 'gilbert.icheboi@gmail.com'
-app.config['MAIL_PASSWORD'] = 'rzcy ydmk sutz yzmq'  # Consider loading from ENV
-app.config['MAIL_DEFAULT_SENDER'] = 'yourmail@gmail.com'
+app.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME")
+app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv("MAIL_DEFAULT_SENDER")
 
 # CORS
 CORS(app, origins=[
