@@ -43,10 +43,10 @@ As an Admin, you can:
 
 ## Setup/Installation Requirements
 #### Backend
-* Clone this repository< git@github.com:gilbert-rgb/Shopsage-E-commerce-Web-App.git>
+* Clone this repository  git@github.com:gilbert-rgb/Shopsage-E-commerce-Web-App.git
 * Navigate to the backend folder
 * Create a virtual environment and install dependencies:`pipenv install`then `pipenv shell`.
-* Activate the environment and run the server:Cflask run --debug`.
+* Activate the environment and run the server: `flask run --debug`.
 #### Frontened
 * Navigate to the frontend directory
 * Install packages:
