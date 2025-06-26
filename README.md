@@ -43,7 +43,7 @@ As an Admin, you can:
 
 ## Setup/Installation Requirements
 #### Backend
-* Clone this repository git@github.com:gilbert-rgb/Shopsage-E-commerce-Web-App.git
+* Clone this repository< git@github.com:gilbert-rgb/Shopsage-E-commerce-Web-App.git>
 * Navigate to the backend folder
 * Create a virtual environment and install dependencies:`pipenv install`then `pipenv shell`.
 * Activate the environment and run the server:Cflask run --debug`.
@@ -58,7 +58,7 @@ As an Admin, you can:
 
 ## Deployment
 * You can view the frontend live on [Frontend (Netlify):](https://clever-crumble-707a93.netlify.app/)
-* You can view the flask backend here [Backend (Render):]("https://e-commerce-web-app-0tco.onrender.com")
+* You can view the flask backend here("https://e-commerce-web-app-0tco.onrender.com")
 
 ## Known Bugs
 The application works perfectly well, no bugs.
@@ -82,4 +82,5 @@ The application works perfectly well, no bugs.
 email :: icheboigilbert@gmail.com
 phone :: +254743143013
 ### License
+ License under MIT
 Licenced under the MIT license
