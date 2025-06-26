@@ -82,5 +82,5 @@ The application works perfectly well, no bugs.
 email :: icheboigilbert@gmail.com
 phone :: +254743143013
 ### License
- License under MIT
+
 Licenced under the MIT license
