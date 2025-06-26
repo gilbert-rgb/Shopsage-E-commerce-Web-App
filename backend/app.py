@@ -39,7 +39,8 @@ app.config['MAIL_DEFAULT_SENDER'] = os.getenv("MAIL_DEFAULT_SENDER")
 # CORS
 CORS(app, origins=[
     "http://localhost:5173",
-    "http://127.0.0.1:5173"
+    "http://127.0.0.1:5173",
+    "https://clever-crumble-707a93.netlify.app"
 ], supports_credentials=True)
 
 # ------------------- Initialize Extensions -------------------
