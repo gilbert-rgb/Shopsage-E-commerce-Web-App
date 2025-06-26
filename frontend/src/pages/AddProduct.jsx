@@ -9,20 +9,20 @@ const AddProduct = () => {
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [stock, setStock] = useState('');
-  const [image, setImage] = useState(''); // ✅ Image state
+  const [image, setImage] = useState(''); 
 
   const { auth_token, currentUser } = useContext(UserContext);
   const { addProduct } = useContext(ProductContext);
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("✅ AddProduct loaded");
-    console.log("👤 currentUser:", currentUser);
-    console.log("🔑 auth_token:", auth_token);
+    console.log(" AddProduct loaded");
+    console.log(" currentUser:", currentUser);
+    console.log(" auth_token:", auth_token);
   }, [currentUser, auth_token]);
 
   if (!currentUser || !currentUser.is_admin) {
-    return <div className="text-center mt-20 text-red-600 text-xl">⛔ Unauthorized. Admins only.</div>;
+    return <div className="text-center mt-20 text-red-600 text-xl">Unauthorized. Admins only.</div>;
   }
 
   const handleSubmit = (e) => {
@@ -73,7 +73,7 @@ const AddProduct = () => {
           className="w-full p-3 border rounded"
           value={image}
           onChange={(e) => setImage(e.target.value)}
-        /> {/* ✅ New field for image URL */}
+        /> {/*  image URL */}
         <button className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700" type="submit">
           Add Product
         </button>

@@ -4,7 +4,7 @@ import { CartContext } from "../contexts/CartContext";
 import { OrderContext } from "../contexts/OrderContext";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { ShoppingCart } from "lucide-react"; // ✅ using lucide icon
+import { ShoppingCart } from "lucide-react"; 
 
 const CartPage = () => {
   const { cart, removeFromCart, getCartTotal, clearCart } = useContext(CartContext);
