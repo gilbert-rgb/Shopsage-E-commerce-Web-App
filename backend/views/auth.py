@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, Blueprint
 from models import db, User, TokenBlocklist
-from werkzeug.security import check_password_hash, generate_password_hash  # <-- Fixed here
+from werkzeug.security import check_password_hash, generate_password_hash
 from flask_jwt_extended import (
     create_access_token, jwt_required, get_jwt_identity, get_jwt
 )
@@ -33,9 +33,12 @@ def create_user_by_admin():
     user = User(
         username=username,
         email=email,
-        password_hash=generate_password_hash(password),
-        is_admin=is_admin
+        password_hash=generate_password_hash(password, method="pbkdf2:sha256"),
+        is_admin=is_admin,
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow()
     )
+
     db.session.add(user)
     db.session.commit()
 
@@ -75,11 +78,11 @@ def fetch_current_user():
         "is_admin": user.is_admin,
         "created_at": user.created_at
     }), 200
+
+# -------------------- Logout --------------------
 @auth_bp.route("/logout", methods=["DELETE"])
 @jwt_required()
 def logout():
-    print("DEBUG - Headers received:", request.headers)
-
     jti = get_jwt()["jti"]
     now = datetime.now(timezone.utc)
 
