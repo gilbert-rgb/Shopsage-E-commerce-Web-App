@@ -14,7 +14,7 @@ app = Flask(__name__)
 # ------------------- Configuration -------------------
 
 # Database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///shopsage.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://shopsage_db_user:llqErpMpeynR1XKszCxbpP9zGLxaxM1N@dpg-d1e55ingi27c7389cn80-a.oregon-postgres.render.com/shopsage_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # JWT
