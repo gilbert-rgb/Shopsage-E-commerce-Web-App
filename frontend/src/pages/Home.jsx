@@ -1,13 +1,35 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserContext } from '../contexts/UserContext';
+import { ProductContext } from '../contexts/ProductContext';
+import { CartContext } from '../contexts/CartContext';
+import { OrderContext } from '../contexts/OrderContext';
+import { toast } from 'react-toastify';
 
 const landingImage = "https://cdn4.vectorstock.com/i/1000x1000/51/13/shopping-cart-logo-icon-e-commerce-bag-vector-39835113.jpg";
 
 const Home = () => {
   const { currentUser } = useContext(UserContext);
+  const { products } = useContext(ProductContext);
+  const { addToCart } = useContext(CartContext);
+  const { place_order } = useContext(OrderContext);
+
   const [searchTerm, setSearchTerm] = useState('');
+  const [quantity, setQuantity] = useState(1);
+  const [featured, setFeatured] = useState(null);
+
   const navigate = useNavigate();
+
+  // Pick a random in-stock product
+  useEffect(() => {
+    if (products && products.length > 0) {
+      const inStockProducts = products.filter(p => p.stock > 0);
+      if (inStockProducts.length > 0) {
+        const randomIndex = Math.floor(Math.random() * inStockProducts.length);
+        setFeatured(inStockProducts[randomIndex]);
+      }
+    }
+  }, [products]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -16,10 +38,40 @@ const Home = () => {
     }
   };
 
+  const handleAddToCart = () => {
+    if (!currentUser) {
+      toast.error("Please login to add to cart");
+      return;
+    }
+    addToCart(featured, Number(quantity));
+    toast.success("Added to cart!");
+  };
+
+  const handleBuyNow = async () => {
+    if (!currentUser) {
+      toast.error("Please login to buy");
+      return;
+    }
+
+    if (quantity <= 0 || quantity > featured.stock) {
+      toast.error("Invalid quantity");
+      return;
+    }
+
+    try {
+      await place_order([{ product_id: featured.id, quantity: Number(quantity) }]);
+      toast.success("Order placed!");
+      navigate("/orders");
+    } catch (error) {
+      toast.error("Failed to place order");
+      console.error(error);
+    }
+  };
+
   return (
     <div className="bg-gray-100 flex items-center justify-center p-8 min-h-screen">
       <div className="w-full max-w-7xl flex flex-col md:flex-row items-center gap-12">
-        
+
         {/* Left Side - Text Content */}
         <div className="w-full md:w-1/2 text-center md:text-left">
           <h1 className="text-5xl md:text-7xl font-extrabold text-gray-800 leading-tight">
@@ -74,13 +126,58 @@ const Home = () => {
               <Link to="/register" className="text-blue-600 underline">register</Link> to place orders.
             </p>
           )}
+
+          {/* 🎯 Featured Product Section */}
+          {featured && (
+            <div className="mt-10 border-t pt-8">
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">Featured Product</h3>
+              <div className="flex flex-col sm:flex-row items-center gap-6">
+                <img
+                  src={featured.image || "https://via.placeholder.com/300"}
+                  alt={featured.name}
+                  className="w-40 h-40 object-cover rounded-lg shadow-md border"
+                />
+                <div>
+                  <h4 className="text-xl font-semibold">{featured.name}</h4>
+                  <p className="text-gray-600">{featured.description}</p>
+                  <p className="font-bold text-blue-600 mt-1">${featured.price}</p>
+                  <p className="text-sm text-gray-500">In stock: {featured.stock}</p>
+
+                  <div className="flex items-center mt-4 gap-2">
+                    <input
+                      type="number"
+                      value={quantity}
+                      min="1"
+                      max={featured.stock}
+                      onChange={(e) => setQuantity(e.target.value)}
+                      className="border px-2 py-1 w-20 rounded"
+                    />
+                    <button
+                      onClick={handleAddToCart}
+                      disabled={!currentUser || featured.stock <= 0}
+                      className="bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600"
+                    >
+                      Add to Cart
+                    </button>
+                    <button
+                      onClick={handleBuyNow}
+                      disabled={!currentUser || featured.stock <= 0}
+                      className="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700"
+                    >
+                      Buy Now
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Right Side - Image */}
+        {/* Right Side - Landing Image */}
         <div className="w-full md:w-1/2">
-          <img 
-            src={landingImage} 
-            alt="ShopSage E-Commerce" 
+          <img
+            src={landingImage}
+            alt="ShopSage E-Commerce"
             className="w-full h-auto rounded-lg shadow-md"
           />
         </div>
