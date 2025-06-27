@@ -59,7 +59,8 @@ As an Admin, you can:
 ## Deployment
 * You can view the frontend live on [Frontend (Netlify):](https://clever-crumble-707a93.netlify.app/)
 * You can view the flask backend here("https://e-commerce-web-app-0tco.onrender.com")
-* [Watch My Video](https://drive.google.com/file/d/19XM2LiXz9BBaxLK6QOVzTwTKSapKTtAF/view?usp=drive_link)
+## presentation video
+* [Watch My Video](https://drive.google.com/file/d/19XM2LiXz9BBaxLK6QOVzTwTKSapKTtAF/view?usp=sharing)
 
 
 ## Known Bugs
